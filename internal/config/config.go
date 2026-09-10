@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"os"
-	"fmt"
 )
 
 type Config struct {
@@ -11,7 +10,7 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
-func (c Config) SetUser(userName string) error {
+func (c *Config) SetUser(userName string) error {
 	
 	// set CurrentUserName
 	c.CurrentUserName = userName
@@ -25,10 +24,10 @@ func (c Config) SetUser(userName string) error {
 	// set .gatorconfig.json file path
 	filePath, err := GetFilePath(".gatorconfig.json")
 	if err != nil {
-		fmt.Printf("Error: %w\n", err)
+		return err
 	}
 
-	// write data to .gatorconfig.sjon
+	// write data to .gatorconfig.json
 	err = os.WriteFile(filePath, data, 0644)
 	if err != nil {
 		return err

@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// write file
-	gatorconfig.SetUser("sebastian")
+ 	gatorconfig.SetUser("sebastian")
 
 	// load .gatorconfig and print content
 	gatorconfig, err = config.Read(configFilePath)
