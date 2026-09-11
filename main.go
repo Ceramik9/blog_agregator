@@ -2,34 +2,46 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"github.com/Ceramik9/blog_agregator/internal/config"
 )
 
 func main() {
 	
-	// get gatorconfig file path
-	configFilePath, err := config.GetFilePath(".gatorconfig.json")
+	// create new state
+	gatorconfigPath, err := config.GetFilePath(".gatorconfig.json")
 	if err != nil {
-		fmt.Printf("Error: %w\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %s", err)
 	}
-
-	// read file
-	gatorconfig, err := config.Read(configFilePath)
+	var s state
+	gatorconfig, err := config.Read(gatorconfigPath)
 	if err != nil {
-		fmt.Printf("Error: %w\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %s", err)
+		os.Exit(1)
 	}
+	s.config = &gatorconfig
+	
+	// initialise new commands list
+	cmds := commands {
+		commandNames: make(map[string]func(*state, command) error),
+	}
+	
+	// register login
+	cmds.register("login", handlerLogin)
 
-	// write file
- 	gatorconfig.SetUser("sebastian")
-
-	// load .gatorconfig and print content
-	gatorconfig, err = config.Read(configFilePath)
+	// user command
+	userCommand := os.Args
+	if len(userCommand) < 2 {
+		fmt.Fprintln(os.Stderr, "Error: not enough arguments")
+		os.Exit(1)
+	}
+	var cmd command
+	cmd.name = userCommand[1]
+	cmd.args = userCommand[2:]
+	err = cmds.run(&s, cmd)
 	if err != nil {
-		fmt.Printf("Error: %w\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %s", err)
+		os.Exit(1)
 	}
-	fmt.Printf("db_url: %s\n", gatorconfig.DbURL)
-	fmt.Printf("current_user_name: %s\n", gatorconfig.CurrentUserName)
-	fmt.Println("config file struct:")
-	fmt.Println(gatorconfig)
 }
 
