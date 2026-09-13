@@ -9,6 +9,7 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -62,4 +63,13 @@ func (q *Queries) GetUser(ctx context.Context, name sql.NullString) (sql.NullStr
 	var name_2 sql.NullString
 	err := row.Scan(&name_2)
 	return name_2, err
+}
+
+const resetUsers = `-- name: ResetUsers :exec
+DELETE FROM users
+`
+
+func (q *Queries) ResetUsers(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetUsers)
+	return err
 }

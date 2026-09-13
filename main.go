@@ -46,6 +46,9 @@ func main() {
 	// retister register handler
 	cmds.register("register", handlerRegister)
 
+	// register reset handler
+	cmds.register("reset", handlerReset)
+
 	// user command
 	userCommand := os.Args
 	if len(userCommand) < 2 {
