@@ -26,7 +26,7 @@ func Read(filePath string) (Config, error) {
 
 
 func GetFilePath(fileName string) (string, error) {
-	workingDir, err := os.Getwd()
+	workingDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}

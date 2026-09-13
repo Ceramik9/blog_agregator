@@ -1,33 +1,50 @@
 package main
 
 import (
+	_ "github.com/lib/pq"
+	"database/sql"
 	"fmt"
 	"os"
 	"github.com/Ceramik9/blog_agregator/internal/config"
+	"github.com/Ceramik9/blog_agregator/internal/database"
 )
 
 func main() {
 	
-	// create new state
+	// create new state struct
+	var s state
+	
+	// load config and add to state
 	gatorconfigPath, err := config.GetFilePath(".gatorconfig.json")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s", err)
 	}
-	var s state
 	gatorconfig, err := config.Read(gatorconfigPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s", err)
 		os.Exit(1)
 	}
 	s.config = &gatorconfig
+
+	// load database and add to state
+	db, err := sql.Open("postgres", s.config.DbURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s", err)
+		os.Exit(1)
+	}
+	dbQueries := database.New(db)
+	s.db = dbQueries
 	
 	// initialise new commands list
 	cmds := commands {
 		commandNames: make(map[string]func(*state, command) error),
 	}
 	
-	// register login
+	// register login handler
 	cmds.register("login", handlerLogin)
+
+	// retister register handler
+	cmds.register("register", handlerRegister)
 
 	// user command
 	userCommand := os.Args
