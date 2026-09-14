@@ -51,6 +51,9 @@ func main() {
 
 	//register users handler
 	cmds.register("users", handlerUsers)
+	
+	// register agg handler
+	cmds.register("agg", handlerAgg)
 
 	// user command
 	userCommand := os.Args

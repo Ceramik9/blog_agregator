@@ -142,7 +142,23 @@ func handlerUsers(s *state, cmd command) error {
 	return nil
 }
 
+func handlerAgg(s *state, cmd command) error {
 
+	// check num of args
+	if len(cmd.args) != 0 {
+		return errors.New("The users command does not take any argumants\n")
+	}
+	
+	// fatch feed and print content
+	url := "https://www.wagslane.dev/index.xml"
+	ctx := context.Background()
+	feed, err := fetchFeed(ctx, url)
+	if err != nil {
+		return err
+	}
+	fmt.Println(feed)
+	return nil
+}
 
 
 
