@@ -120,3 +120,35 @@ func  handlerReset(s *state, cmd command) error {
 	return nil
 }
 
+func handlerUsers(s *state, cmd command) error {
+	
+	// check num of args
+	if len(cmd.args) != 0 {
+		return errors.New("The users command does not take any argumants\n")
+	}
+	// get a slice of users
+	ctx := context.Background()
+	users, err := s.db.GetUsers(ctx)
+	if err != nil {
+		return err
+	}
+	for _, user := range users {
+		if user.String == s.config.CurrentUserName {
+			fmt.Printf("* %s (current)\n", user.String)
+		} else {
+			fmt.Printf("* %s\n",user.String)
+		}
+	}
+	return nil
+}
+
+
+
+
+
+
+
+
+
+
+
