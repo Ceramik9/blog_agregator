@@ -160,7 +160,54 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command, name, url string) error {
+func handlerAddFeed(s *state, cmd command) error {
+	
+	//check num of args
+	if len(cmd.args) != 2 {
+		return errors.New("The addfeed command takes 2 arguments, feed name and the url\n")
+	}
+
+	// get user id
+	userName := sql.NullString {
+		String: s.config.CurrentUserName,
+		Valid:  true,
+	}
+	ctx := context.Background()
+	id, err := s.db.GetUserId(ctx, userName)
+	if err != nil {
+		return err
+	}
+	userId := uuid.NullUUID {
+		UUID:  id,
+		Valid: true,
+}
+
+	// create feed name
+	feedName := sql.NullString {
+		String: cmd.args[0],
+		Valid:  true,
+	}
+
+	// create feed url
+	feedUrl := sql.NullString {
+		String: cmd.args[1],
+		Valid:  true,
+	}
+	
+	// create feed
+	feed := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      feedName,
+		Url:       feedUrl,
+		UserID:    userId,
+	}
+	_, err = s.db.CreateFeed(ctx, feed)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Feed '%s' created", cmd.args[0])
 	return nil
 }
 

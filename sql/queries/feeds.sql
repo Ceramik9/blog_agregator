@@ -17,5 +17,3 @@ INSERT INTO feeds (
   )
   RETURNING *;
 
-
-

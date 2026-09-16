@@ -55,6 +55,9 @@ func main() {
 	// register agg handler
 	cmds.register("agg", handlerAgg)
 
+	// register add feed handler
+	cmds.register("addfeed", handlerAddFeed)
+
 	// parse user command
 	userCommand := os.Args
 	if len(userCommand) < 2 {
