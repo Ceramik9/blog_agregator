@@ -87,7 +87,7 @@ func handlerRegister(s *state, cmd command) error {
 		UpdatedAt: time.Now(),
 		Name:      name,
 	}
-	_, err = s.db.CreateUser(ctx, userParams)
+ 	_, err = s.db.CreateUser(ctx, userParams)
 	if err != nil {
 		return err
 	}
@@ -157,6 +157,10 @@ func handlerAgg(s *state, cmd command) error {
 		return err
 	}
 	fmt.Println(feed)
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command, name, url string) error {
 	return nil
 }
 

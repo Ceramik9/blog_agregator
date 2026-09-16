@@ -55,7 +55,7 @@ func main() {
 	// register agg handler
 	cmds.register("agg", handlerAgg)
 
-	// user command
+	// parse user command
 	userCommand := os.Args
 	if len(userCommand) < 2 {
 		fmt.Fprintln(os.Stderr, "Error: not enough arguments")
