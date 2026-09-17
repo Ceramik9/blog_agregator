@@ -60,6 +60,7 @@ func handlerLogin(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
+
 	fmt.Printf("The user %s is now logged in\n", cmd.args[0])
 	return nil
 }
@@ -98,7 +99,7 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
-	// success
+
 	return nil
 }
 
@@ -140,6 +141,7 @@ func handlerUsers(s *state, cmd command) error {
 			fmt.Printf("* %s\n",user.String)
 		}
 	}
+
 	return nil
 }
 
@@ -157,6 +159,7 @@ func handlerAgg(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
+
 	fmt.Println(feed)
 	return nil
 }
@@ -181,7 +184,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	userId := uuid.NullUUID {
 		UUID:  id,
 		Valid: true,
-}
+	}
 
 	// create feed name
 	feedName := sql.NullString {
@@ -208,6 +211,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
+
 	fmt.Printf("Feed '%s' created", cmd.args[0])
 	return nil
 }
@@ -237,7 +241,57 @@ func handlerFeeds(s * state, cmd command) error {
 	return nil
 }
 
+func handlerFollow(s *state, cmd command) error {
+	
+	// check num of args
+	if len(cmd.args) != 1 {
+		return errors.New("The follow command takes one argumant, url\n")
+	}
 
+	// get current user id
+	userName := sql.NullString {
+		String: s.config.CurrentUserName,
+		Valid:  true,
+	}
+	ctx := context.Background()
+	id, err := s.db.GetUserId(ctx, userName)
+	if err != nil {
+		return err
+	}
+	userId := uuid.NullUUID {
+		UUID: id,
+		Valid:  true,
+	}
+	
+	// get feed
+	feedUrl := sql.NullString {
+		String: cmd.args[0],
+		Valid: true,
+	}
+	feed, err := s.db.GetFeed(ctx, feedUrl)
+	if err != nil {
+		return err
+	}
+	feedId := uuid.NullUUID {
+		UUID: feed.ID,
+		Valid:  true,
+	}
+
+	// insert follow record
+	followRecord := database.CreateFeedFollowParams{
+		ID: uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID: userId,
+		FeedID: feedId,
+	}
+	followRow, err := s.db.CreateFeedFollow(ctx, followRecord)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%s now follows %s", followRow.UserName.String, followRow.FeedName.String)
+	return nil
+}
 
 
 

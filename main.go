@@ -61,6 +61,9 @@ func main() {
 	// register print feeds
 	cmds.register("feeds", handlerFeeds)
 
+	// register feed follow
+	cmds.register("follow", handlerFollow)
+
 	// parse user command
 	userCommand := os.Args
 	if len(userCommand) < 2 {
@@ -72,7 +75,7 @@ func main() {
 	cmd.args = userCommand[2:]
 	err = cmds.run(&s, cmd)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s", err)
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		os.Exit(1)
 	}
 }

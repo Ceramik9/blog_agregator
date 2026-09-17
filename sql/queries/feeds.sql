@@ -21,3 +21,8 @@ INSERT INTO feeds (
 SELECT feeds.name, feeds.url, users.name AS user
 FROM feeds
 JOIN users ON users.id = feeds.user_id;
+
+-- name: GetFeed :one
+SELECT * FROM feeds
+  WHERE url = $1;
+
