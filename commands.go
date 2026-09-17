@@ -10,10 +10,12 @@ import (
 	"github.com/Ceramik9/blog_agregator/internal/database"
 )
 
+
 // commands struct
 type commands struct {
 	commandNames map[string]func(*state, command) error
 }
+
 
 func (c *commands) run(s *state, cmd command) error {
 	runCommand, ok := c.commandNames[cmd.name]
@@ -27,6 +29,7 @@ func (c *commands) run(s *state, cmd command) error {
 	return nil
 }
 
+
 func (c *commands) register(name string, f func(s *state, cmd command) error) {
 	c.commandNames[name] = f
 }
@@ -36,6 +39,7 @@ type command struct {
 	name    string
 	args    []string
 }
+
 
 func handlerLogin(s *state, cmd command) error {
 	
@@ -64,6 +68,7 @@ func handlerLogin(s *state, cmd command) error {
 	fmt.Printf("The user %s is now logged in\n", cmd.args[0])
 	return nil
 }
+
 
 func handlerRegister(s *state, cmd command) error {
 	
@@ -103,6 +108,7 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
+
 func  handlerReset(s *state, cmd command) error {
 	
 	// check num of args
@@ -120,6 +126,7 @@ func  handlerReset(s *state, cmd command) error {
 	fmt.Println("Users table has been reset")
 	return nil
 }
+
 
 func handlerUsers(s *state, cmd command) error {
 	
@@ -145,6 +152,7 @@ func handlerUsers(s *state, cmd command) error {
 	return nil
 }
 
+
 func handlerAgg(s *state, cmd command) error {
 
 	// check num of args
@@ -163,6 +171,7 @@ func handlerAgg(s *state, cmd command) error {
 	fmt.Println(feed)
 	return nil
 }
+
 
 func handlerAddFeed(s *state, cmd command) error {
 	
@@ -216,6 +225,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	return nil
 }
 
+
 func handlerFeeds(s * state, cmd command) error {
 	
 	// check num of args
@@ -241,6 +251,7 @@ func handlerFeeds(s * state, cmd command) error {
 	return nil
 }
 
+
 func handlerFollow(s *state, cmd command) error {
 	
 	// check num of args
@@ -259,40 +270,77 @@ func handlerFollow(s *state, cmd command) error {
 		return err
 	}
 	userId := uuid.NullUUID {
-		UUID: id,
+		UUID:   id,
 		Valid:  true,
 	}
 	
 	// get feed
 	feedUrl := sql.NullString {
 		String: cmd.args[0],
-		Valid: true,
+		Valid:  true,
 	}
 	feed, err := s.db.GetFeed(ctx, feedUrl)
 	if err != nil {
 		return err
 	}
 	feedId := uuid.NullUUID {
-		UUID: feed.ID,
-		Valid:  true,
+		UUID:  feed.ID,
+		Valid: true,
 	}
 
 	// insert follow record
 	followRecord := database.CreateFeedFollowParams{
-		ID: uuid.New(),
+		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID: userId,
-		FeedID: feedId,
+		UserID:    userId,
+		FeedID:    feedId,
 	}
 	followRow, err := s.db.CreateFeedFollow(ctx, followRecord)
 	if err != nil {
 		return err
 	}
+
 	fmt.Printf("%s now follows %s", followRow.UserName.String, followRow.FeedName.String)
 	return nil
 }
 
+
+func handlerFollowing(s *state, cmd command) error {
+	
+	// check num of args
+	if len(cmd.args) != 1 {
+		return errors.New("The following command takes one argumant, username\n")
+	}
+	
+	// create context
+	ctx := context.Background()
+	
+	// get user id
+	userName := sql.NullString {
+		String: cmd.args[0],
+		Valid:  true,
+	}
+	id, err := s.db.GetUserId(ctx, userName)
+	if err != nil {
+		return err
+	}
+	userId := uuid.NullUUID {
+		UUID:  id,
+		Valid: true,
+	}
+
+	// print feed follows for given user
+	feeds, err := s.db.GetFeedFollowsForUser(ctx, userId)
+	if err != nil {
+		return err
+	}
+	for i, feed := range feeds {
+		fmt.Printf("%d. %s", i+1, feed.FeedName)
+	}
+
+	return nil
+}
 
 
 

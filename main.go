@@ -64,6 +64,9 @@ func main() {
 	// register feed follow
 	cmds.register("follow", handlerFollow)
 
+	// register following handler
+	cmds.register("following", handlerFollowing)
+
 	// parse user command
 	userCommand := os.Args
 	if len(userCommand) < 2 {
