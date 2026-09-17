@@ -220,8 +220,14 @@ func handlerAddFeed(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Printf("Feed '%s' created", cmd.args[0])
+	
+	// print succes and follow the feed
+	fmt.Printf("Feed '%s' created\n", cmd.args[0])
+	cmd = command {
+		name: "follow",
+		args: []string{feed.Url.String},
+	}
+	handlerFollow(s, cmd)
 	return nil
 }
 
@@ -301,7 +307,7 @@ func handlerFollow(s *state, cmd command) error {
 		return err
 	}
 
-	fmt.Printf("%s now follows %s", followRow.UserName.String, followRow.FeedName.String)
+	fmt.Printf("%s now follows '%s'", followRow.UserName.String, followRow.FeedName.String)
 	return nil
 }
 
@@ -309,8 +315,8 @@ func handlerFollow(s *state, cmd command) error {
 func handlerFollowing(s *state, cmd command) error {
 	
 	// check num of args
-	if len(cmd.args) != 1 {
-		return errors.New("The following command takes one argumant, username\n")
+	if len(cmd.args) != 0 {
+		return errors.New("The following command does not take any arguments\n")
 	}
 	
 	// create context
@@ -318,7 +324,7 @@ func handlerFollowing(s *state, cmd command) error {
 	
 	// get user id
 	userName := sql.NullString {
-		String: cmd.args[0],
+		String: s.config.CurrentUserName,
 		Valid:  true,
 	}
 	id, err := s.db.GetUserId(ctx, userName)
@@ -336,7 +342,7 @@ func handlerFollowing(s *state, cmd command) error {
 		return err
 	}
 	for i, feed := range feeds {
-		fmt.Printf("%d. %s", i+1, feed.FeedName)
+		fmt.Printf("%d. %s\n", i+1, feed.FeedName.String)
 	}
 
 	return nil
