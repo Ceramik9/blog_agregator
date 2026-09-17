@@ -126,6 +126,7 @@ func handlerUsers(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		return errors.New("The users command does not take any argumants\n")
 	}
+
 	// get a slice of users
 	ctx := context.Background()
 	users, err := s.db.GetUsers(ctx)
@@ -211,6 +212,30 @@ func handlerAddFeed(s *state, cmd command) error {
 	return nil
 }
 
+func handlerFeeds(s * state, cmd command) error {
+	
+	// check num of args
+	if len(cmd.args) != 0 {
+		return errors.New("The users command does not take any argumants\n")
+	}
+
+	// get feeds
+	ctx := context.Background()
+	feeds, err := s.db.GetFeeds(ctx)
+	if err != nil {
+		return err
+	}
+
+	// print feeds from feeds table
+	for i, feed := range feeds {
+		fmt.Printf("Feed %d:\n", i + 1)
+		fmt.Printf("Title: %s\n",feed.Name.String)
+		fmt.Printf("URL: %s\n", feed.Url.String)
+		fmt.Printf("User: %s\n\n", feed.User.String)
+	}
+
+	return nil
+}
 
 
 

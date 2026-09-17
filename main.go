@@ -57,6 +57,9 @@ func main() {
 
 	// register add feed handler
 	cmds.register("addfeed", handlerAddFeed)
+	
+	// register print feeds
+	cmds.register("feeds", handlerFeeds)
 
 	// parse user command
 	userCommand := os.Args
