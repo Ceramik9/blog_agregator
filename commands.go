@@ -173,7 +173,7 @@ func handlerAgg(s *state, cmd command) error {
 }
 
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	
 	//check num of args
 	if len(cmd.args) != 2 {
@@ -181,17 +181,8 @@ func handlerAddFeed(s *state, cmd command) error {
 	}
 
 	// get user id
-	userName := sql.NullString {
-		String: s.config.CurrentUserName,
-		Valid:  true,
-	}
-	ctx := context.Background()
-	id, err := s.db.GetUserId(ctx, userName)
-	if err != nil {
-		return err
-	}
 	userId := uuid.NullUUID {
-		UUID:  id,
+		UUID:  user.ID,
 		Valid: true,
 	}
 
@@ -216,7 +207,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		Url:       feedUrl,
 		UserID:    userId,
 	}
-	_, err = s.db.CreateFeed(ctx, feed)
+	_, err := s.db.CreateFeed(context.Background(), feed)
 	if err != nil {
 		return err
 	}
@@ -227,7 +218,7 @@ func handlerAddFeed(s *state, cmd command) error {
 		name: "follow",
 		args: []string{feed.Url.String},
 	}
-	handlerFollow(s, cmd)
+	handlerFollow(s, cmd, user)
 	return nil
 }
 
@@ -258,25 +249,19 @@ func handlerFeeds(s * state, cmd command) error {
 }
 
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 	
+	// create context
+	ctx := context.Background()
+
 	// check num of args
 	if len(cmd.args) != 1 {
 		return errors.New("The follow command takes one argumant, url\n")
 	}
 
 	// get current user id
-	userName := sql.NullString {
-		String: s.config.CurrentUserName,
-		Valid:  true,
-	}
-	ctx := context.Background()
-	id, err := s.db.GetUserId(ctx, userName)
-	if err != nil {
-		return err
-	}
 	userId := uuid.NullUUID {
-		UUID:   id,
+		UUID:   user.ID,
 		Valid:  true,
 	}
 	
@@ -312,32 +297,21 @@ func handlerFollow(s *state, cmd command) error {
 }
 
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	
 	// check num of args
 	if len(cmd.args) != 0 {
 		return errors.New("The following command does not take any arguments\n")
 	}
 	
-	// create context
-	ctx := context.Background()
-	
 	// get user id
-	userName := sql.NullString {
-		String: s.config.CurrentUserName,
-		Valid:  true,
-	}
-	id, err := s.db.GetUserId(ctx, userName)
-	if err != nil {
-		return err
-	}
 	userId := uuid.NullUUID {
-		UUID:  id,
+		UUID:  user.ID,
 		Valid: true,
 	}
 
 	// print feed follows for given user
-	feeds, err := s.db.GetFeedFollowsForUser(ctx, userId)
+	feeds, err := s.db.GetFeedFollowsForUser(context.Background(), userId)
 	if err != nil {
 		return err
 	}

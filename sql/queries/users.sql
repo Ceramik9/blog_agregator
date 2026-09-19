@@ -14,7 +14,7 @@ INSERT INTO users (
   RETURNING *;
 
 -- name: GetUser :one
-SELECT name FROM users
+SELECT * FROM users
   WHERE name = $1;
 
 -- name: GetUserId :one
