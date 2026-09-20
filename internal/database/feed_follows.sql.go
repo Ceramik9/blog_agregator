@@ -80,7 +80,7 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 }
 
 const getFeedFollowsForUser = `-- name: GetFeedFollowsForUser :many
-SELECT 
+SELECT
   feed_follows.id, feed_follows.created_at, feed_follows.updated_at, feed_follows.user_id, feed_follows.feed_id,
   feeds.name AS feed_name,
   users.name AS user_name
@@ -129,4 +129,19 @@ func (q *Queries) GetFeedFollowsForUser(ctx context.Context, userID uuid.NullUUI
 		return nil, err
 	}
 	return items, nil
+}
+
+const unfollowFeed = `-- name: UnfollowFeed :exec
+DELETE FROM feed_follows
+  WHERE user_id = $1 AND feed_id = $2
+`
+
+type UnfollowFeedParams struct {
+	UserID uuid.NullUUID
+	FeedID uuid.NullUUID
+}
+
+func (q *Queries) UnfollowFeed(ctx context.Context, arg UnfollowFeedParams) error {
+	_, err := q.db.ExecContext(ctx, unfollowFeed, arg.UserID, arg.FeedID)
+	return err
 }

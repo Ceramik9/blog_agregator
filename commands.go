@@ -323,6 +323,47 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 }
 
 
+func handlerUnfollowFeed(s *state, cmd command, user database.User) error {
+	
+	// check num of args
+	if len(cmd.args) != 1 {
+		return errors.New("The unfollow command takes one argument, feed url\n")
+	}
 
+	// create context
+	ctx :=  context.Background()
+	
+	// get user id
+	userId := uuid.NullUUID {
+		UUID:  user.ID,
+		Valid: true,
+	}
+
+	// get feed id
+	feedUrl := sql.NullString {
+		String: cmd.args[0],
+		Valid:  true,
+	}
+	feed, err := s.db.GetFeed(ctx, feedUrl)
+	if err != nil {
+		return err
+	}
+	feedId := uuid.NullUUID {
+		UUID:  feed.ID,
+		Valid: true,
+	}
+
+	feedFollow := database.UnfollowFeedParams {
+		UserID: userId,
+		FeedID: feedId,
+	}
+	err = s.db.UnfollowFeed(ctx, feedFollow)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s unfollowed '%s'\n",user.Name.String, feed.Name.String)
+	return nil
+}
 
 

@@ -58,14 +58,18 @@ func main() {
 	// register add feed handler
 	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	
-	// register print feeds
+	// register print feeds handler
 	cmds.register("feeds", handlerFeeds)
 
-	// register feed follow
+	// register feed follow handler
 	cmds.register("follow", middlewareLoggedIn(handlerFollow))
 
 	// register following handler
 	cmds.register("following", middlewareLoggedIn(handlerFollowing))
+
+	// register unfollow feed handler
+	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollowFeed))
+	// register unfollow feed
 
 	// parse user command
 	userCommand := os.Args
