@@ -156,19 +156,24 @@ func handlerUsers(s *state, cmd command) error {
 func handlerAgg(s *state, cmd command) error {
 
 	// check num of args
-	if len(cmd.args) != 0 {
-		return errors.New("The users command does not take any argumants\n")
+	if len(cmd.args) != 1 {
+		return errors.New("The add command takes one argument, time in seconds\n")
 	}
 	
-	// fatch feed and print content
-	url := "https://www.wagslane.dev/index.xml"
-	ctx := context.Background()
-	feed, err := fetchFeed(ctx, url)
+	// set time interval
+	commandArg := cmd.args[0] + "s"
+	timeBetweenRequests, err := time.ParseDuration(commandArg)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Collecting feeds every %v\n", timeBetweenRequests)
+	
 
-	fmt.Println(feed)
+	// fetch feed and print content
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <- ticker.C {
+		scrapeFeeds(s)
+	}
 	return nil
 }
 
@@ -239,7 +244,7 @@ func handlerFeeds(s * state, cmd command) error {
 
 	// print feeds from feeds table
 	for i, feed := range feeds {
-		fmt.Printf("Feed %d:\n", i + 1)
+		fmt.Printf("Feed %d\n", i + 1)
 		fmt.Printf("Title: %s\n",feed.Name.String)
 		fmt.Printf("URL: %s\n", feed.Url.String)
 		fmt.Printf("User: %s\n\n", feed.User.String)
@@ -272,7 +277,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	}
 	feed, err := s.db.GetFeed(ctx, feedUrl)
 	if err != nil {
-		return err
+		return fmt.Errorf("error getting the feed:\n %w", err)
 	}
 	feedId := uuid.NullUUID {
 		UUID:  feed.ID,
@@ -289,7 +294,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	}
 	followRow, err := s.db.CreateFeedFollow(ctx, followRecord)
 	if err != nil {
-		return err
+		return fmt.Errorf("error inserting follow record:\n %w", err)
 	}
 
 	fmt.Printf("%s now follows '%s'", followRow.UserName.String, followRow.FeedName.String)
