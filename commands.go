@@ -7,6 +7,7 @@ import (
 	"time"
 	"fmt"
 	"errors"
+	"strconv"
 	"github.com/Ceramik9/blog_agregator/internal/database"
 )
 
@@ -370,5 +371,55 @@ func handlerUnfollowFeed(s *state, cmd command, user database.User) error {
 	fmt.Printf("%s unfollowed '%s'\n",user.Name.String, feed.Name.String)
 	return nil
 }
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+
+	// check num of args
+	if len(cmd.args) > 1 {
+		return errors.New("The browse command can take 1 argument, number representing post limit\n")
+	}
+	var limit int32
+	if len(cmd.args) == 1 {
+		arg, err := strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return fmt.Errorf("invalid limit:\n", err)
+		}
+		limit = int32(arg)
+	} else {
+		limit = 2
+	}
+	
+	//create context
+	ctx := context.Background()
+
+	// get user posts
+	userPostsParams := database.GetPostsForUserParams {
+		UserID: uuid.NullUUID {
+			UUID:  user.ID,
+			Valid: true,
+			},
+		Limit: limit,
+		}
+	posts, err := s.db.GetPostsForUser(ctx, userPostsParams) 
+		if err != nil {
+			return fmt.Errorf("error getting user posts\n%w", err)
+		}
+		for i, post := range posts {
+		fmt.Printf("%d. %s\n", i+1, post.Title)
+		fmt.Printf("Source: %s\n", post.Url)
+		fmt.Printf("Description:\n%s\n", post.Description.String)
+		fmt.Print("\n")
+	}
+	return nil
+}
+
+
+
+
+
+
+
+
+
 
 

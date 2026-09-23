@@ -69,7 +69,9 @@ func main() {
 
 	// register unfollow feed handler
 	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollowFeed))
-	// register unfollow feed
+	
+	// register browse posts handler
+	cmds.register("browse", middlewareLoggedIn(handlerBrowse))
 
 	// parse user command
 	userCommand := os.Args
